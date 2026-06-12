@@ -1,55 +1,38 @@
 import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
 import { toNodeHandler } from "better-auth/node";
 import connectDB from './config/db.js';
-import transactionRoutes from './routes/transactionRoutes.js';
-import { errorHandler } from './middleware/errorMiddleware.js';
 
-const app = express();
+// Global connection state to preserve database allocation across serverless invocations
+let isDbConnected = false;
 
-// Global variable to persist connection across serverless function invocations
-let isConnected = false;
+export default async function handler(req, res) {
+  // 1. Instantly respond to CORS Preflight checks at the root gateway step
+  res.setHeader('Access-Control-Allow-Origin', 'https://finance-tracker-by-jubayer.vercel.app');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, X-Requested-With, Accept');
 
-// Serverless Database Connection Lifeline Wrapper
-app.use(async (req, res, next) => {
-  if (!isConnected) {
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // 2. Establish database connection lazily
+  if (!isDbConnected) {
     try {
       await connectDB();
-      isConnected = true;
+      isDbConnected = true;
     } catch (err) {
-      console.error("Database lazy-loading connection failed:", err);
-      return res.status(500).json({ message: "Database infrastructure unreachable" });
+      console.error("Database connection failure:", err);
+      return res.status(500).json({ error: "Database unreachable" });
     }
   }
-  next();
-});
 
-app.use(cors({ 
-  origin: 'https://finance-tracker-by-jubayer.vercel.app',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
-}));
+  // 3. Directly hand the request payload over to Better Auth's core processing engine
+  if (req.url.startsWith('/api/auth')) {
+    const { auth } = await import("./config/auth.js");
+    return toNodeHandler(auth)(req, res);
+  }
 
-// Handle preflight checks explicitly
-app.options('*', cors());
-
-// Dynamically import Better Auth only when an auth route is hit
-app.all("/api/auth/*", async (req, res, next) => {
-  const { auth } = await import("./config/auth.js");
-  return toNodeHandler(auth)(req, res, next);
-});
-
-app.use(express.json());
-app.use('/api/transactions', transactionRoutes);
-app.use(errorHandler);
-
-// Required for Vercel's serverless wrapper mapping execution
-export default app; 
-
-// Fallback for local development environments
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => console.log(`Development Server executing on port ${PORT}`));
+  // Fallback handler for non-auth requests
+  return res.status(404).json({ message: "Route node unmapped" });
 }
