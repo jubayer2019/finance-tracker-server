@@ -12,9 +12,12 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     },
   },
-  // Essential for decoupled cross-origin session storage sharing
   advanced: {
     crossSubDomainCookie: true,
   },
-  trustedOrigins: [process.env.CLIENT_URL || "http://localhost:3000"],
+  // Update this array to include your production deployment URL
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://finance-tracker-by-jubayer.vercel.app"
+  ],
 });

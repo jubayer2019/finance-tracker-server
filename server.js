@@ -10,12 +10,33 @@ import { errorHandler } from './middleware/errorMiddleware.js';
 const app = express();
 await connectDB();
 
+// 1. CONFIGURE PRODUCTION CORS SAFE-LIST
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://finance-tracker-by-jubayer.vercel.app' // Your frontend URL
+];
+
 app.use(cors({ 
-  origin: process.env.CLIENT_URL || 'http://localhost:3000', 
-  credentials: true 
+  origin: function (origin, callback) {
+    // Allow server-to-server or tools like Postman (which don't have an origin header)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Blocked by security boundary: CORS policy violation.'));
+    }
+  },
+  credentials: true, // Crucial for Better Auth session cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
-// ⚠️ CRITICAL: Mount Better Auth catch-all router BEFORE applying express.json() middleware
+// 2. EXPLICITLY HANDLE OPTIONS PREFLIGHT TERMINATION
+// Better Auth requires explicit options parsing over cross-subdomains
+app.options('*', cors());
+
+// Mount Better Auth catch-all router
 app.all("/api/auth/*", toNodeHandler(auth));
 
 app.use(express.json());
