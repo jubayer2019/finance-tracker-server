@@ -1,17 +1,16 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-/**
- * Transaction schema for income/expense tracking
- */
-const transactionSchema = new mongoose.Schema(
-  {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    type: { type: String, enum: ["income", "expense"], required: true },
-    amount: { type: Number, required: true },
-    category: { type: String, required: true },
-    note: { type: String }
+const transactionSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  title: { type: String, required: true, trim: true },
+  amount: { type: Number, required: true },
+  type: { type: String, enum: ['income', 'expense'], required: true },
+  category: { 
+    type: String, 
+    required: true, 
+    enum: ['Salary', 'Freelance', 'Investments', 'Food', 'Rent', 'Utilities', 'Entertainment', 'Other'] 
   },
-  { timestamps: true }
-);
+  date: { type: Date, required: true, default: Date.now }
+}, { timestamps: true });
 
-module.exports = mongoose.model("Transaction", transactionSchema);
+module.exports = mongoose.model('Transaction', transactionSchema);

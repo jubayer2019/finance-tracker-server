@@ -1,17 +1,17 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
+const { getTransactions, createTransaction, deleteTransaction, getDashboardSummary } = require('../controllers/transactionController');
+const { protect } = require('../middleware/authMiddleware');
 
-const controller = require("../controllers/transactionController");
-const auth = require("../middleware/authMiddleware");
+router.use(protect);
 
-/**
- * Protected routes
- */
-router.use(auth);
+router.route('/')
+  .get(getTransactions)
+  .post(createTransaction);
 
-router.post("/", controller.createTransaction);
-router.get("/", controller.getTransactions);
-router.delete("/:id", controller.deleteTransaction);
-router.get("/summary/monthly", controller.getMonthlySummary);
+router.route('/:id')
+  .delete(deleteTransaction);
+
+router.get('/summary/analytics', getDashboardSummary);
 
 module.exports = router;

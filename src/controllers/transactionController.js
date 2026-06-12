@@ -1,50 +1,51 @@
-const Transaction = require("../models/Transaction");
-const transactionService = require("../services/transactionService");
+const Transaction = require('../models/Transaction');
+const financeService = require('../services/financeService');
 
-/**
- * Create new transaction
- */
-exports.createTransaction = async (req, res, next) => {
-  try {
-    const data = await transactionService.create(req.user.id, req.body);
-    res.status(201).json(data);
-  } catch (err) {
-    next(err);
-  }
-};
-
-/**
- * Get all transactions for user
- */
 exports.getTransactions = async (req, res, next) => {
   try {
-    const data = await transactionService.getAll(req.user.id);
-    res.json(data);
-  } catch (err) {
-    next(err);
+    const transactions = await Transaction.find({ user: req.user._id }).sort({ date: -1 });
+    res.json(transactions);
+  } catch (error) {
+    next(error);
   }
 };
 
-/**
- * Delete transaction
- */
+exports.createTransaction = async (req, res, next) => {
+  try {
+    const { title, amount, type, category, date } = req.body;
+    const transaction = await Transaction.create({
+      user: req.user._id,
+      title,
+      amount,
+      type,
+      category,
+      date: date || Date.now()
+    });
+    res.status(201).json(transaction);
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.deleteTransaction = async (req, res, next) => {
   try {
-    await transactionService.remove(req.params.id, req.user.id);
-    res.json({ message: "Deleted successfully" });
-  } catch (err) {
-    next(err);
+    const transaction = await Transaction.findOne({ _id: req.params.id, user: req.user._id });
+    if (!transaction) {
+      res.status(404);
+      throw new Error('Transaction record missing or unauthorized');
+    }
+    await transaction.deleteOne();
+    res.json({ message: 'Transaction successfully purged' });
+  } catch (error) {
+    next(error);
   }
 };
 
-/**
- * Monthly summary (income vs expense)
- */
-exports.getMonthlySummary = async (req, res, next) => {
+exports.getDashboardSummary = async (req, res, next) => {
   try {
-    const data = await transactionService.monthlySummary(req.user.id);
-    res.json(data);
-  } catch (err) {
-    next(err);
+    const metrics = await financeService.calculateMetrics(req.user._id);
+    res.json(metrics);
+  } catch (error) {
+    next(error);
   }
 };
