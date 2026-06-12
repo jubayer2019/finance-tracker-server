@@ -1,0 +1,75 @@
+
+/* =========================
+   DEPENDENCIES
+========================= */
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+/* =========================
+   ENV FILES (CRITICAL SECURITY)
+========================= */
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env*.local
+
+/* =========================
+   NEXT.JS BUILD
+========================= */
+.next
+out
+build
+dist
+
+/* =========================
+   LOGS
+========================= */
+logs
+*.log
+
+/* =========================
+   OS FILES
+========================= */
+.DS_Store
+Thumbs.db
+
+/* =========================
+   IDE SETTINGS
+========================= */
+.vscode
+.idea
+
+/* =========================
+   BACKEND TEMP FILES
+========================= */
+coverage
+.tmp
+
+/* =========================
+   DATABASE BACKUPS (IF ANY)
+========================= */
+*.sqlite
+*.db
+
+/* =========================
+   DEPLOYMENT FILES
+========================= */
+.vercel
+.render
+netlify
+
+/* =========================
+   DEBUG / CACHE
+========================= */
+.cache
+.eslintcache
+
+/* =========================
+   OPTIONAL: TEST FILES
+========================= */
+coverage
