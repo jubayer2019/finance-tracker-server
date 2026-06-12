@@ -1,9 +1,14 @@
 import { betterAuth } from "better-auth";
-import mongoose from "mongoose";
+
+// Check for the variable immediately to prevent silent environment failures
+if (!process.env.MONGO_URI) {
+  throw new Error("CRITICAL CONFIGURATION ERROR: MONGO_URI environment variable is missing.");
+}
 
 export const auth = betterAuth({
   database: {
-    db: mongoose.connection.db,
+    // Pass the connection string directly so Better Auth doesn't rely on Mongoose's lifecycle
+    url: process.env.MONGO_URI,
     type: "mongodb"
   },
   socialProviders: {
@@ -15,7 +20,6 @@ export const auth = betterAuth({
   advanced: {
     crossSubDomainCookie: true,
   },
-  // Update this array to include your production deployment URL
   trustedOrigins: [
     "http://localhost:3000",
     "https://finance-tracker-by-jubayer.vercel.app"
