@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import connectDB from './config/db.js';
+import connectDB from '../config/db.js';
 
 let isDbConnected = false;
 
@@ -39,9 +39,9 @@ export default async function handler(req, res) {
     }
 
     // Better Auth routes
-    if (req.url?.startsWith('/api/auth')) {
+    if (req.url?.includes('/auth')) {
         try {
-            const { auth } = await import('./config/auth.js');
+            const { auth } = await import('../config/auth.js');
             const { toNodeHandler } = await import('better-auth/node');
 
             return toNodeHandler(auth)(req, res);
