@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     }
 
     // Better Auth routes
-    if (req.url?.includes('/auth')) {
+    if (req.url?.startsWith('/api/auth')) {
         try {
             const { auth } = await import('../config/auth.js');
             const { toNodeHandler } = await import('better-auth/node');
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     }
 
     // Health check route
-    if (req.url === '/' || req.url === '') {
+    if (req.url === '/' || req.url === '/api') {
         return res.status(200).json({
             success: true,
             message: 'Finance Server is running'
