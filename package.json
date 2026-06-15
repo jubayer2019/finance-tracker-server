@@ -8,6 +8,7 @@
     "vercel-build": "echo 'Skipping entrypoint build step'"
   },
   "dependencies": {
+    "@better-auth/mongo-adapter": "^1.6.17",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.6.17",
     "cors": "^2.8.6",
@@ -15,6 +16,7 @@
     "express": "^5.2.1",
     "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.3.0",
     "mongoose": "^9.7.0"
   },
   "devDependencies": {
