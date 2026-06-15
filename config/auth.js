@@ -1,20 +1,23 @@
 import { betterAuth } from "better-auth";
 
 export const auth = betterAuth({
-  database: {
-    url: process.env.MONGO_URI,
-    type: "mongodb"
-  },
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    database: {
+        type: "mongodb",
+        url: process.env.MONGO_URI,
     },
-  },
-  advanced: {
-    crossSubDomainCookie: true,
-  },
-  trustedOrigins: [
-    "https://finance-tracker-by-jubayer.vercel.app"
-  ],
+
+    trustedOrigins: [
+        "https://finance-tracker-by-jubayer.vercel.app",
+    ],
+
+    socialProviders: {
+        google: {
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        },
+    },
+
+    advanced: {
+        crossSubDomainCookie: true,
+    },
 });
