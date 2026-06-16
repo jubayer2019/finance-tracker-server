@@ -1,29 +1,33 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
-const User = require('./models/User');
-const Transaction = require('./models/Transaction');
+import "dotenv/config";
+import mongoose from "mongoose";
+import Transaction from "./models/Transaction.js";
+import Budget from "./models/Budget.js";
 
 const seedDatabase = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("Purging telemetry tables...");
-    await User.deleteMany();
-    await Transaction.deleteMany();
+    const userId = process.env.SEED_USER_ID;
+    if (!userId) {
+      console.error(
+        "Set SEED_USER_ID to an existing Better Auth user id before seeding."
+      );
+      process.exit(1);
+    }
 
-    console.log("Provisioning target root user account...");
-    const testUser = await User.create({
-      name: "Akash Sandbox Operator",
-      email: "sandbox@finengine.io",
-      password: "secure_sandbox_token_1122",
-      monthlyBudget: 5000
-    });
+    await mongoose.connect(process.env.MONGO_URI);
+
+    console.log("Purging existing telemetry for user...");
+    await Transaction.deleteMany({ userId });
+    await Budget.deleteMany({ userId });
+
+    console.log("Provisioning budget...");
+    await Budget.create({ userId, monthlyBudget: 5000 });
 
     console.log("Generating transaction logs...");
     await Transaction.create([
-      { user: testUser._id, title: "Enterprise Contract Retainer", amount: 8500, type: "income", category: "Salary" },
-      { user: testUser._id, title: "Production Cluster Framework", amount: 1200, type: "expense", category: "Utilities" },
-      { user: testUser._id, title: "Stripe Payment Inflow", amount: 450, type: "income", category: "Freelance" },
-      { user: testUser._id, title: "Office Leasehold Matrix", amount: 1800, type: "expense", category: "Rent" }
+      { userId, title: "Enterprise Contract Retainer", amount: 8500, type: "income", category: "Salary" },
+      { userId, title: "Production Cluster Framework", amount: 1200, type: "expense", category: "Utilities" },
+      { userId, title: "Stripe Payment Inflow", amount: 450, type: "income", category: "Freelance" },
+      { userId, title: "Office Leasehold Matrix", amount: 1800, type: "expense", category: "Rent" },
     ]);
 
     console.log("Mock data successfully injected.");
