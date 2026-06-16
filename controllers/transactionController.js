@@ -1,25 +1,27 @@
-const Transaction = require('../models/Transaction');
-const financeService = require('../services/financeService');
+import Transaction from "../models/Transaction.js";
+import { calculateMetrics } from "../services/financeService.js";
 
-exports.getTransactions = async (req, res, next) => {
+export const getTransactions = async (req, res, next) => {
   try {
-    const transactions = await Transaction.find({ user: req.user._id }).sort({ date: -1 });
+    const transactions = await Transaction.find({ userId: req.user.id }).sort({
+      date: -1,
+    });
     res.json(transactions);
   } catch (error) {
     next(error);
   }
 };
 
-exports.createTransaction = async (req, res, next) => {
+export const createTransaction = async (req, res, next) => {
   try {
     const { title, amount, type, category, date } = req.body;
     const transaction = await Transaction.create({
-      user: req.user._id,
+      userId: req.user.id,
       title,
       amount,
       type,
       category,
-      date: date || Date.now()
+      date: date || Date.now(),
     });
     res.status(201).json(transaction);
   } catch (error) {
@@ -27,23 +29,26 @@ exports.createTransaction = async (req, res, next) => {
   }
 };
 
-exports.deleteTransaction = async (req, res, next) => {
+export const deleteTransaction = async (req, res, next) => {
   try {
-    const transaction = await Transaction.findOne({ _id: req.params.id, user: req.user._id });
+    const transaction = await Transaction.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
     if (!transaction) {
       res.status(404);
-      throw new Error('Transaction record missing or unauthorized');
+      throw new Error("Transaction record missing or unauthorized");
     }
     await transaction.deleteOne();
-    res.json({ message: 'Transaction successfully purged' });
+    res.json({ message: "Transaction successfully purged" });
   } catch (error) {
     next(error);
   }
 };
 
-exports.getDashboardSummary = async (req, res, next) => {
+export const getDashboardSummary = async (req, res, next) => {
   try {
-    const metrics = await financeService.calculateMetrics(req.user._id);
+    const metrics = await calculateMetrics(req.user.id);
     res.json(metrics);
   } catch (error) {
     next(error);

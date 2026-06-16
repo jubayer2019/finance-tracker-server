@@ -1,17 +1,20 @@
-const express = require('express');
+import express from "express";
+import {
+  getTransactions,
+  createTransaction,
+  deleteTransaction,
+  getDashboardSummary,
+} from "../controllers/transactionController.js";
+import { protect } from "../middleware/authMiddleware.js";
+
 const router = express.Router();
-const { getTransactions, createTransaction, deleteTransaction, getDashboardSummary } = require('../controllers/transactionController');
-const { protect } = require('../middleware/authMiddleware');
 
 router.use(protect);
 
-router.route('/')
-  .get(getTransactions)
-  .post(createTransaction);
+router.route("/").get(getTransactions).post(createTransaction);
 
-router.route('/:id')
-  .delete(deleteTransaction);
+router.route("/:id").delete(deleteTransaction);
 
-router.get('/summary/analytics', getDashboardSummary);
+router.get("/summary/analytics", getDashboardSummary);
 
-module.exports = router;
+export default router;

@@ -1,16 +1,30 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
-const transactionSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  title: { type: String, required: true, trim: true },
-  amount: { type: Number, required: true },
-  type: { type: String, enum: ['income', 'expense'], required: true },
-  category: { 
-    type: String, 
-    required: true, 
-    enum: ['Salary', 'Freelance', 'Investments', 'Food', 'Rent', 'Utilities', 'Entertainment', 'Other'] 
+const transactionSchema = new mongoose.Schema(
+  {
+    // Better Auth user id (string), used to scope every query per user.
+    userId: { type: String, required: true, index: true },
+    title: { type: String, required: true, trim: true },
+    amount: { type: Number, required: true },
+    type: { type: String, enum: ["income", "expense"], required: true },
+    category: {
+      type: String,
+      required: true,
+      enum: [
+        "Salary",
+        "Freelance",
+        "Investments",
+        "Food",
+        "Rent",
+        "Utilities",
+        "Entertainment",
+        "Other",
+      ],
+    },
+    date: { type: Date, required: true, default: Date.now },
   },
-  date: { type: Date, required: true, default: Date.now }
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('Transaction', transactionSchema);
+export default mongoose.models.Transaction ||
+  mongoose.model("Transaction", transactionSchema);
