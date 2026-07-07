@@ -26,9 +26,15 @@ app.use(
 );
 app.use(express.json());
 
+const { toNodeHandler } = require("better-auth/node");
+const auth = require("./config/betterAuth");
+
 /**
  * Routes
  */
+const authPaths = ["sign-in", "sign-up", "sign-out", "session", "callback", "error", "forget-password", "reset-password", "verify-email", "send-verification-email", "revoke-session", "social"];
+app.all(authPaths.map(p => `/api/${p}/*`), (req, res) => toNodeHandler(auth)(req, res));
+app.all(authPaths.map(p => `/api/${p}`), (req, res) => toNodeHandler(auth)(req, res));
 app.use("/api/auth", authRoutes);
 app.use("/api/transactions", transactionRoutes);
 
